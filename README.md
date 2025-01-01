@@ -11,24 +11,25 @@
 ## 🛠️ Tech Stack
 - **Backend**: Neo4j (graph database)
 - **Frontend**: Streamlit
-- **Data Sources**: OpenAlex API, Semantic Scholar API
+- **Data Sources**: OpenAlex API
 - **Language**: Python (for backend and frontend integration)
 
 ## 📂 Project Structure
 ```
 paper-chain-explorer/
-├── data/            # Scripts to fetch and preprocess data
-├── src/             # Core application code
-│   ├── app.py       # Streamlit app entry point
-│   ├── graph.py     # Functions for Neo4j interactions
-│   └── visualize.py # Graph visualization logic
-├── queries/         # Graph queries (e.g., Cypher scripts)
-├── notebooks/       # Jupyter notebooks for prototyping
-├── tests/           # Test cases
-├── docs/            # Documentation
-├── .gitignore       # Git ignore rules
-├── requirements.txt # Python dependencies
-└── README.md        # Project overview
+├── data/                  # Scripts to fetch and preprocess data
+├── src/                   # Core application code
+│   ├── setup_database.py  #
+│   ├── app.py             # Streamlit app entry point
+│   ├── graph.py           # Functions for Neo4j interactions
+│   └── visualize.py       # Graph visualization logic
+├── queries/               # Graph queries (e.g., Cypher scripts)
+├── notebooks/             # Jupyter notebooks for prototyping
+├── tests/                 # Test cases
+├── docs/                  # Documentation
+├── .gitignore             # Git ignore rules
+├── requirements.txt       # Python dependencies
+└── README.md              # Project overview
 ```
 
 ## 🧩 Usage
@@ -55,8 +56,7 @@ paper-chain-explorer/
 
 ## 🌐 Reference Web Pages
 Here are the key resources used for data and development:
-- [Semantic Scholar API](https://www.semanticscholar.org/product/api)
-- [OpenAlex API](https://openalex.org/)
+- [PyAlex](https://github.com/J535D165/pyalex)
 - [Streamlit Documentation](https://docs.streamlit.io/)
 - [Neo4j Documentation](https://neo4j.com/docs/)
 - [Cytoscape.js Documentation](https://js.cytoscape.org/)
