@@ -56,10 +56,12 @@ paper-chain-explorer/
 
 ## 🌐 Reference Web Pages
 Here are the key resources used for data and development:
-- [PyAlex](https://github.com/J535D165/pyalex)
-- [Streamlit Documentation](https://docs.streamlit.io/)
-- [Neo4j Documentation](https://neo4j.com/docs/)
-- [Cytoscape.js Documentation](https://js.cytoscape.org/)
+- [J535D165/pyalex: A Python library for OpenAlex (openalex.org)](https://github.com/J535D165/pyalex)
+- [Introduction - Cypher Manual](https://neo4j.com/docs/cypher-manual/current/introduction/)
+- [API Documentation — Neo4j Python Driver 5.27](https://neo4j.com/docs/api/python-driver/current/api.html)
+- [GraphRAG for Python — neo4j-graphrag-python  documentation](https://neo4j.com/docs/neo4j-graphrag-python/current/index.html)
+- [Streamlit documentation](https://docs.streamlit.io/)
+- [ChrisDelClea/streamlit-agraph: A Streamlit Graph Vis](https://github.com/ChrisDelClea/streamlit-agraph)
 
 ## 🌟 Contribution
 Contributions are welcome! Feel free to open issues or submit pull requests.
