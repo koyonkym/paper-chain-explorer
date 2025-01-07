@@ -1,3 +1,4 @@
+**English** | [日本語](#paperchainexplorer-1)
 # PaperChainExplorer
 
 **An interactive graph-based application to explore academic paper connections.**  
@@ -124,3 +125,136 @@ We welcome contributions to improve PaperChainExplorer! Here are ways you can he
 
 ## 📜 License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+<br>
+<br>
+<br>
+
+[English](#paperchainexplorer) | **日本語**
+# PaperChainExplorer
+
+**学術論文のつながりを探索するためのインタラクティブなグラフベースアプリケーション**  
+PaperChainExplorer は、研究者や学生、学術専門家が、学術論文や著者、研究機関の間の関係を可視化し、分析することを支援します。使いやすいインターフェースによって、引用チェーンや共同著者の関係を研究分野内で探索できます。
+
+> **注記:** 「トピック」の概念はまだアプリケーションに統合されていません。今後の機能拡張として計画しています。
+
+## 🧙‍♂️ インスピレーション
+このプロジェクトは、学術研究における隠れたつながりを明らかにするというアイデアに触発され、研究者や学生が忘れられたアイデアを再発見し、革新を促すことを目指しています。
+
+## 🚀 機能
+- 学術論文、著者、（将来的には）トピック間の関係をインタラクティブなグラフで可視化。
+- 論文間の経路をクエリ（例：「私の論文は Transformer の論文とどのように繋がっていますか？」）。
+- 引用ネットワークや共有著者関係をインタラクティブに探索。
+- 私の*平凡な*論文が、「Attention Is All You Need」のような画期的な論文と繋がっているかどうか知りたいですか？PaperChainExplorerがこれらの驚くべき関係を明らかにします。
+- **Streamlit** を使用して構築されたシンプルで直感的なユーザーインターフェース。
+
+## 🛠️ 技術スタック
+- **バックエンド**: Python - アプリケーションロジックの処理、Neo4jとの統合、外部ソースからのデータ取得を実行。
+- **データベース**: Neo4j - 学術論文、著者間の関係を保存し、クエリを実行するためのグラフデータベース。
+- **フロントエンド**: Streamlit - グラフの可視化とクエリ実行のためのインタラクティブなユーザーインターフェースを提供。
+- **API**: OpenAlex API - 学術論文、著者、研究機関に関するデータを取得し、アプリケーションで利用。
+
+## 📂 プロジェクト構成
+```
+paper-chain-explorer/
+├── data/                  # （未使用）OpenAlex API からデータを取得し、前処理するスクリプト
+├── src/                   # コアアプリケーションコード
+│   ├── setup_database.py  # Neo4j のデータベースセットアップスクリプト
+│   ├── app.py             # Streamlit アプリのエントリーポイント
+│   ├── graph.py           # （未使用）Neo4j とのやり取りのための関数
+│   ├── visualize.py       # （未使用）Streamlit でのグラフ可視化のロジック
+├── queries/               # （未使用）一般的な操作のための事前定義された Cypher クエリ
+├── notebooks/             # （未使用）プロトタイピングと実験用の Jupyter ノートブック
+├── tests/                 # バックエンドとフロントエンドの機能テスト
+├── docs/                  # （未使用）ユーザーや開発者向けのドキュメント
+├── .gitignore             # Git のルール
+├── requirements.txt       # Python の依存関係
+└── README.md              # プロジェクトの概要
+```
+
+> **注記:** 以下のファイルとディレクトリは現在未使用ですが、将来の開発に使用予定です。
+> - `data/`
+> - `src/graph.py`
+> - `src/visualize.py`
+> - `queries/`
+> - `notebooks/`
+> - `docs/`
+
+## 🧩 デプロイ
+アプリをサーバーにデプロイする手順は次のとおりです：
+
+1. リポジトリをクローン：
+   ```bash
+   git clone https://github.com/koyonkym/paper-chain-explorer.git
+   ```
+
+2. 環境をセットアップ：
+   ```bash
+   cd paper-chain-explorer
+   python -m venv venv
+   source venv/bin/activate  # Linux/Macの場合
+   venv\Scripts\activate     # Windowsの場合
+   pip install -r requirements.txt
+   ```
+
+3. Neo4j インスタンスをセットアップ（ローカルまたはクラウド上）し、接続を構成。
+
+4. 以下の環境変数をセットアップ：
+   - `NEO4J_URI` - Neo4j インスタンスの URI。
+   - `NEO4J_USERNAME` - Neo4j の認証用ユーザー名。
+   - `NEO4J_PASSWORD` - Neo4j の認証用パスワード。
+   - `OPENALEX_EMAIL` - OpenAlex API の使用に必要なメールアドレス。
+   - `OPENAI_API_KEY` - OpenAI サービス用の API キー。
+
+   Linux/Mac での例：
+   ```bash
+   export NEO4J_URI="bolt://localhost:7687"
+   export NEO4J_USERNAME="neo4j"
+   export NEO4J_PASSWORD="password"
+   export OPENALEX_EMAIL="your-email@example.com"
+   export OPENAI_API_KEY="your-openai-api-key"
+   ```
+
+5. Neo4j データベースにグラフを作成：
+   ```bash
+   python src/setup_database.py
+   ```
+   このステップで OpenAlex API からデータを取得し、初期グラフを Neo4j データベースに作成します。
+
+6. Streamlit アプリケーションを起動：
+   ```bash
+   streamlit run src/app.py
+   ```
+
+## 🧪 テスト実行
+テストを実行するには、以下のコマンドを実行：
+```bash
+pytest tests/
+```
+これにより、`tests/` ディレクトリ内のすべての単体テストが実行されます。
+
+## 🔍 クエリの例
+- 論文 A と論文 B はどのようにつながっていますか？
+   - このクエリは、引用チェーンや共同著者を可視化します。
+- 「Attention Is All You Need」の著者は誰ですか？
+   - このクエリは、論文の著者関係を取得し、可視化します。
+- 「Transforer」に関連するすべての論文を見つけてください
+   - **将来の機能**: このクエリは現在サポートされていません。アプリはベクトル埋め込みによる意味的な類似性を使用しておらず、引用ベースの接続のみを表示します。この機能の追加が将来のアップデートとして計画しています。
+
+## 🌐 参考ウェブページ
+データと開発で使用した主要リソースは次のとおりです：
+- [J535D165/pyalex: A Python library for OpenAlex (openalex.org)](https://github.com/J535D165/pyalex)
+- [Introduction - Cypher Manual](https://neo4j.com/docs/cypher-manual/current/introduction/)
+- [API Documentation — Neo4j Python Driver 5.27](https://neo4j.com/docs/api/python-driver/current/api.html)
+- [GraphRAG for Python — neo4j-graphrag-python  documentation](https://neo4j.com/docs/neo4j-graphrag-python/current/index.html)
+- [Streamlit documentation](https://docs.streamlit.io/)
+- [ChrisDelClea/streamlit-agraph: A Streamlit Graph Vis](https://github.com/ChrisDelClea/streamlit-agraph)
+
+## 🌟 貢献
+PaperChainExplorer の改善への貢献を歓迎します！以下の方法でご協力いただけます：
+- **バグの報告**: 問題を説明した Issue を作成してください。
+- **機能の提案**: 新しい機能要求を Issue として投稿してください。
+- **コード改善の提案**: リポジトリをフォークし、変更を加えてプルリクエストを作成してください。
+
+## 📜 ライセンス
+このプロジェクトは MIT ライセンスのです。詳細は [LICENSE](LICENSE) ファイルをご覧ください。
