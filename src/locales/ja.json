@@ -1,0 +1,13 @@
+{
+  "description": "このアプリは、学術論文、著者、研究機関の関係をクエリに基づいて可視化します。\n- **自然言語クエリ**: 例として、**「Attention Is All You Need」を書いたのは誰？** といった質問が可能です。",
+  "query_input_label": "クエリを入力してください:",
+  "query_input_placeholder": "例: 「Attention Is All You Need」を書いたのは誰ですか？",
+  "run_query_button": "クエリ実行",
+  "query_error": "有効なクエリを入力してください。",
+  "processing_message": "クエリを処理中...",
+  "success_message": "クエリが正常に実行されました！",
+  "no_results_message": "クエリの結果が見つかりませんでした。",
+  "error_message": "エラーが発生しました: {}",
+  "neo4j_error": "Neo4j の認証情報が設定されていません。環境変数を確認してください。",
+  "neo4j_connection_error": "Neo4j に接続できませんでした: {}"
+}
