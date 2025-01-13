@@ -1,3 +1,4 @@
+import json
 import os
 import neo4j.graph
 import streamlit as st
@@ -9,17 +10,30 @@ from neo4j_graphrag.retrievers import Text2CypherRetriever
 from neo4j_graphrag.llm import OpenAILLM
 
 
+# Function to load translations dynamically
+def load_translations(language_code):
+    file_path = f"src/locales/{language_code}.json"
+    with open(file_path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+# Language Selector
+language = st.sidebar.selectbox("Select Language / 言語を選択", ["English", "日本語"])
+
+# Determine language code based on user selection
+language_code = "en" if language == "English" else "ja"
+translations = load_translations(language_code)
+
 # Streamlit App
 st.title("Paper Chain Explorer")
-st.markdown("""
-This app visualizes relationships between academic papers, authors, and institutions based on your queries.
-- **Natural Language Queries**: Ask questions like **Who wrote "Attention Is All You Need"?**
-""")
+st.markdown(translations["description"])
 
 col1, col2 = st.columns([5, 1], vertical_alignment="bottom")
 
 with col1:
-    query_text = st.text_input("Enter your query:", placeholder='E.g., Who wrote "Attention Is All You Need"?')
+    query_text = st.text_input(
+        translations["query_input_label"],
+        placeholder=translations["query_input_placeholder"]
+    )
 
 # Neo4j and Text2Cypher Setup
 @st.cache_resource
@@ -32,7 +46,7 @@ def get_neo4j_driver(uri: str, username: str, password: str) -> neo4j.Driver:
         driver = GraphDatabase.driver(uri, auth=(username, password))
         driver.verify_connectivity()
     except Exception as e:
-        st.error(f"Failed to connect to Neo4j: {e}")
+        st.error(translations["neo4j_connection_error"].format(e))
         raise
     return driver
 
@@ -55,23 +69,18 @@ def setup_text2cypher(driver: neo4j.Driver) -> Text2CypherRetriever:
     """
     examples = [
         "USER INPUT: 'Who wrote \"Attention Is All You Need\"?' QUERY: MATCH (a:Author)-[r:AUTHORED]->(w:Work {title: 'Attention Is All You Need'}) RETURN a, r, w",
-        "USER INPUT: 'How is Koyo's \"Liver segmentation\" paper connected to \"Attention Is All You Need\" paper?' QUERY: MATCH p = SHORTEST 1 (a:Author)-[:AUTHORED]->(b:Work)-[*]-(c:Work) WHERE a.display_name CONTAINS 'Koyo' AND b.title CONTAINS 'Liver segmentation' AND c.title = 'Attention Is All You Need' RETURN p"
+        "USER INPUT: 'How is Koyo's \"Liver segmentation\" paper connected to \"Attention Is All You Need\" paper?' QUERY: MATCH p = SHORTEST 1 (a:Author)-[:AUTHORED]->(b:Work)-[*]-(c:Work) WHERE a.display_name CONTAINS 'Koyo' AND b.title CONTAINS 'Liver segmentation' AND c.title = 'Attention Is All You Need' RETURN p",
+        "USER INPUT: '「Attention Is All You Need」を書いたのは誰ですか？' QUERY: MATCH (a:Author)-[r:AUTHORED]->(w:Work {title: 'Attention Is All You Need'}) RETURN a, r, w",
+        "USER INPUT: 'Koyo の「Liver segmentation」の論文は、「Attention Is All You Need」の論文とどのようにつながっていますか？' QUERY: MATCH p = SHORTEST 1 (a:Author)-[:AUTHORED]->(b:Work)-[*]-(c:Work) WHERE a.display_name CONTAINS 'Koyo' AND b.title CONTAINS 'Liver segmentation' AND c.title = 'Attention Is All You Need' RETURN p",
     ]
     return Text2CypherRetriever(driver=driver, llm=llm, neo4j_schema=neo4j_schema, examples=examples)
 
-# with st.sidebar:
-#     st.subheader("Neo4j Configuration")
-#     uri = st.text_input("Neo4j URI", os.getenv("NEO4J_URI", ""))
-#     username = st.text_input("Neo4j Username", os.getenv("NEO4J_USERNAME", ""))
-#     password = st.text_input("Neo4j Password", os.getenv("NEO4J_PASSWORD", ""), type="password")
-
-# Validate environment variables
 uri = os.getenv("NEO4J_URI")
 username = os.getenv("NEO4J_USERNAME")
 password = os.getenv("NEO4J_PASSWORD")
 
 if not uri or not username or not password:
-    st.error("Neo4j credentials are not set. Please check your environment variables.")
+    st.error(translations["neo4j_error"])
     st.stop()
 
 # Connect to Neo4j
@@ -133,27 +142,27 @@ if "graph_data" not in st.session_state:
     st.session_state.graph_data = None
 
 with col2:
-    button = st.button("Run Query", use_container_width=True)
+    button = st.button(translations["run_query_button"], use_container_width=True)
 
 # Process Query
 if button:
     if not query_text.strip():
-        st.error("Please enter a valid query.")
+        st.error(translations["query_error"])
     else:
-        with st.spinner("Processing your query..."):
+        with st.spinner(translations["processing_message"]):
             try:
                 # Generate Cypher query from natural language
                 results = retriever.get_search_results(query_text=query_text)
 
                 if results.records:
-                    st.success("Query executed successfully!")
+                    st.success(translations["success_message"])
                     cypher = results.metadata["cypher"]
                     nodes, edges, config = prepare_graph_data(results.records)
                     st.session_state.graph_data = {"cypher": cypher, "nodes": nodes, "edges": edges, "config": config}
                 else:
-                    st.warning("No results found for your query.")
+                    st.warning(translations["no_results_message"])
             except Exception as e:
-                st.error(f"An error occurred: {e}")
+                st.error(translations["error_message"].format(e))
 
 # Render the graph if data is available
 if st.session_state.graph_data:

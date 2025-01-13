@@ -1,0 +1,13 @@
+{
+  "description": "This app visualizes relationships between academic papers, authors, and institutions based on your queries.\n- **Natural Language Queries**: Ask questions like **Who wrote \"Attention Is All You Need\"?**",
+  "query_input_label": "Enter your query:",
+  "query_input_placeholder": "E.g., Who wrote \"Attention Is All You Need\"?",
+  "run_query_button": "Run Query",
+  "query_error": "Please enter a valid query.",
+  "processing_message": "Processing your query...",
+  "success_message": "Query executed successfully!",
+  "no_results_message": "No results found for your query.",
+  "error_message": "An error occurred: {}",
+  "neo4j_error": "Neo4j credentials are not set. Please check your environment variables.",
+  "neo4j_connection_error": "Failed to connect to Neo4j: {}"
+}

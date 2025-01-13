@@ -13,8 +13,8 @@ Inspired by the idea of uncovering hidden connections in academic research, this
 - Visualize relationships between academic papers, authors, and (future) topics with interactive graphs.
 - Query paths between papers (e.g., "How is my paper connected to the Transformer paper?").
 - Explore citation networks and shared authorships interactively.
-- Wondering if your *mediocre* paper connects to a groundbreaking one like *"Attention Is All You Need"*? PaperChainExplorer helps uncover these surprising relationships.
 - Simple and intuitive user interface built with **Streamlit**.
+- Wondering if your *mediocre* paper connects to a groundbreaking one like *"Attention Is All You Need"*? PaperChainExplorer helps uncover these surprising relationships.
 
 ## 🛠️ Tech Stack
 - **Backend**: Python - Handles application logic, integrates with Neo4j, and fetches data from external sources.
@@ -27,6 +27,9 @@ Inspired by the idea of uncovering hidden connections in academic research, this
 paper-chain-explorer/
 ├── data/                  # (Unused) Scripts to fetch and preprocess data from OpenAlex API
 ├── src/                   # Core application code
+│   ├── locales/           # Translation files
+│   │   ├── en.json        # English translations
+│   │   └── ja.json        # Japanese translations
 │   ├── setup_database.py  # Database setup scripts for Neo4j
 │   ├── app.py             # Main Streamlit app entry point
 │   ├── graph.py           # (Unused) Functions for interacting with Neo4j
@@ -145,8 +148,8 @@ PaperChainExplorer は、研究者や学生、学術専門家が、学術論文�
 - 学術論文、著者、（将来的には）トピック間の関係をインタラクティブなグラフで可視化。
 - 論文間の経路をクエリ（例：「私の論文は Transformer の論文とどのように繋がっていますか？」）。
 - 引用ネットワークや共有著者関係をインタラクティブに探索。
-- 私の*平凡な*論文が、「Attention Is All You Need」のような画期的な論文と繋がっているかどうか知りたいですか？PaperChainExplorerがこれらの驚くべき関係を明らかにします。
 - **Streamlit** を使用して構築されたシンプルで直感的なユーザーインターフェース。
+- 私の*平凡な*論文が、「Attention Is All You Need」のような画期的な論文と繋がっているかどうか知りたいですか？PaperChainExplorerがこれらの驚くべき関係を明らかにします。
 
 ## 🛠️ 技術スタック
 - **バックエンド**: Python - アプリケーションロジックの処理、Neo4jとの統合、外部ソースからのデータ取得を実行。
@@ -159,6 +162,9 @@ PaperChainExplorer は、研究者や学生、学術専門家が、学術論文�
 paper-chain-explorer/
 ├── data/                  # （未使用）OpenAlex API からデータを取得し、前処理するスクリプト
 ├── src/                   # コアアプリケーションコード
+│   ├── locales/           # 翻訳ファイル
+│   │   ├── en.json        # 英語翻訳
+│   │   └── ja.json        # 日本語翻訳
 │   ├── setup_database.py  # Neo4j のデータベースセットアップスクリプト
 │   ├── app.py             # Streamlit アプリのエントリーポイント
 │   ├── graph.py           # （未使用）Neo4j とのやり取りのための関数
