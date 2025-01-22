@@ -8,6 +8,7 @@ from neo4j import GraphDatabase
 from neo4j.exceptions import ServiceUnavailable
 from neo4j_graphrag.retrievers import Text2CypherRetriever
 from neo4j_graphrag.llm import OpenAILLM
+from neo4j_graphrag.embeddings import OpenAIEmbeddings
 
 
 # Function to load translations dynamically
@@ -53,6 +54,7 @@ def get_neo4j_driver(uri: str, username: str, password: str) -> neo4j.Driver:
 # @st.cache_resource
 def setup_text2cypher(driver: neo4j.Driver) -> Text2CypherRetriever:
     llm = OpenAILLM(model_name="gpt-4o-mini")
+    # llm = OpenAILLM(model_name="gpt-4o")
     neo4j_schema = """
     Node properties:
     Work {id: STRING, title: STRING}
@@ -73,7 +75,29 @@ def setup_text2cypher(driver: neo4j.Driver) -> Text2CypherRetriever:
         "USER INPUT: '「Attention Is All You Need」を書いたのは誰ですか？' QUERY: MATCH (a:Author)-[r:AUTHORED]->(w:Work {title: 'Attention Is All You Need'}) RETURN a, r, w",
         "USER INPUT: 'Koyo の「Liver segmentation」の論文は、「Attention Is All You Need」の論文とどのようにつながっていますか？' QUERY: MATCH p = SHORTEST 1 (a:Author)-[:AUTHORED]->(b:Work)-[*]-(c:Work) WHERE a.display_name CONTAINS 'Koyo' AND b.title CONTAINS 'Liver segmentation' AND c.title = 'Attention Is All You Need' RETURN p",
     ]
-    return Text2CypherRetriever(driver=driver, llm=llm, neo4j_schema=neo4j_schema, examples=examples)
+    custom_prompt = """
+Task: Generate a Cypher statement for querying a Neo4j graph database from a user input.
+
+Schema:
+{schema}
+
+Vector Search Results:
+{vector_search_results}
+
+Examples:
+{examples}
+
+Input:
+{query_text}
+
+Instructions:
+- Ensure the query returns all nodes and relationships involved in the query.
+- Do not use any properties or relationships not included in the schema.
+- Do not include triple backticks ``` or any additional text except the generated Cypher statement in your response.
+
+Cypher query:
+"""
+    return Text2CypherRetriever(driver=driver, llm=llm, neo4j_schema=neo4j_schema, examples=examples, custom_prompt=custom_prompt)
 
 uri = os.getenv("NEO4J_URI")
 username = os.getenv("NEO4J_USERNAME")
@@ -90,6 +114,7 @@ driver = get_neo4j_driver(
     password=password
 )
 retriever = setup_text2cypher(driver)
+embedder = OpenAIEmbeddings(model="text-embedding-3-small")
 
 # Function to visualize graph
 def prepare_graph_data(records):
@@ -151,8 +176,30 @@ if button:
     else:
         with st.spinner(translations["processing_message"]):
             try:
+                schema = """
+Node properties:
+Work {id: STRING, title: STRING}
+Author {id: STRING, display_name: STRING}
+Institution {id: STRING, display_name: STRING}
+Relationship properties:
+REFERENCED {}
+AUTHORED {}
+AFFILIATED_WITH {}
+The relationships:
+(:Work)-[:REFERENCED]->(:Work)
+(:Author)-[:AUTHORED]->(:Work)
+(:Author)-[:AFFILIATED_WITH]->(:Institution)
+"""
+                vector = embedder.embed_query(query_text)
+                records, summary, keys = driver.execute_query(
+                    "CALL db.index.vector.queryNodes('work-vector-index', 3, $vector) YIELD node, score RETURN node.title, score",
+                    {"vector": vector}
+                )
+                vector_search_results = ""
+                for record in records:
+                    vector_search_results += f"title: {record[0]}, score: {record[1]}\n"
                 # Generate Cypher query from natural language
-                results = retriever.get_search_results(query_text=query_text)
+                results = retriever.get_search_results(query_text=query_text, prompt_params={"schema": schema, "vector_search_results": vector_search_results})
 
                 if results.records:
                     st.success(translations["success_message"])
@@ -160,6 +207,7 @@ if button:
                     nodes, edges, config = prepare_graph_data(results.records)
                     st.session_state.graph_data = {"cypher": cypher, "nodes": nodes, "edges": edges, "config": config}
                 else:
+                    st.code(results.metadata["cypher"])
                     st.warning(translations["no_results_message"])
             except Exception as e:
                 st.error(translations["error_message"].format(e))

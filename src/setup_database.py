@@ -4,6 +4,8 @@ import pyalex
 from pyalex import Works, Authors, Institutions
 from neo4j import GraphDatabase
 from neo4j.exceptions import ServiceUnavailable
+from neo4j_graphrag.indexes import create_vector_index
+from neo4j_graphrag.embeddings import OpenAIEmbeddings
 
 
 class Neo4jHandler:
@@ -19,6 +21,7 @@ class Neo4jHandler:
             raise RuntimeError(f"Failed to connect to Neo4j: {e}")
         self.query_buffer = []
         self.id_histoty = []
+        self.embedder = OpenAIEmbeddings(model="text-embedding-3-small")
 
     def close(self):
         self.driver.close()
@@ -30,6 +33,19 @@ class Neo4jHandler:
             raise RuntimeError(f"Service unavailable while executing query: {e}")
         except Exception as e:
             raise RuntimeError(f"An error occurred while executing query: {e}")
+
+    def create_vector_index(self, index_name: str, label: str, embedding_property: str, dimensions: int, similarity_fn: str = "euclidean"):
+        try:
+            create_vector_index(
+                self.driver,
+                index_name,
+                label=label,
+                embedding_property=embedding_property,
+                dimensions=dimensions,
+                similarity_fn=similarity_fn,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to create vector index: {e}")
 
     def add_to_batch(self, query: str, parameters: dict = None) -> None:
         self.query_buffer.append((query, parameters or {}))
@@ -50,9 +66,11 @@ class Neo4jHandler:
     def add_work(self, work: Works) -> None:
         id = work["id"].replace("https://openalex.org/", "")
         if id not in self.id_histoty:
+            vector = self.embedder.embed_query(text=work["title"])
             self.add_to_batch(
-                "MERGE (n:Work {id: $id, title: $title})",
-                {"id": id, "title": work["title"]}
+                # "MERGE (n:Work {id: $id, title: $title, vectorProperty: $vectorProperty})",
+                "MERGE (n:Work {id: $id}) ON CREATE SET n.title = $title, n.vectorProperty = $vectorProperty ON MATCH SET n.title = $title, n.vectorProperty = $vectorProperty",
+                {"id": id, "title": work["title"], "vectorProperty": vector}
             )
             self.id_histoty.append(id)
 
@@ -107,7 +125,7 @@ class Neo4jHandler:
             {"id1": id1, "id2": id2}
         )
 
-    def traverse_and_add_works(self, initial_work: Works, depth: int = 3) -> None:
+    def traverse_and_add_works(self, initial_work: Works, depth: int = 1) -> None:
         self.add_work(initial_work)
         author_ids = [authorship["author"]["id"].replace("https://openalex.org/", "") for authorship in initial_work["authorships"]]
         authors = []
@@ -147,7 +165,7 @@ class Neo4jHandler:
                 self.traverse_and_add_works(work, depth - 1)
                 self.add_referenced(initial_work, work)
 
-    def build_graph_from_work(self, initial_work: Works, depth: int = 3) -> None:
+    def build_graph_from_work(self, initial_work: Works, depth: int = 1) -> None:
         self.traverse_and_add_works(initial_work, depth)
         self.flush()
 
@@ -161,23 +179,42 @@ if __name__ == "__main__":
         password=os.getenv("NEO4J_PASSWORD")
     )
 
-    # neo4j_handler.execute_query(
-    #     "MATCH (n)"
-    #     "DETACH DELETE n"
-    # )
+    # Create vector index
+    neo4j_handler.create_vector_index(
+        index_name="work-vector-index",
+        label="Work",
+        embedding_property="vectorProperty",
+        dimensions=1536,
+        similarity_fn="euclidean",
+    )
 
     neo4j_handler.execute_query(
         "CREATE TEXT INDEX node_text_index_id IF NOT EXISTS FOR (n:Work) ON (n.id)"
     )
 
+    neo4j_handler.execute_query(
+        "CREATE CONSTRAINT constraint_unique_work_id IF NOT EXISTS FOR (n:Work) REQUIRE n.id IS UNIQUE"
+    )
+
+    neo4j_handler.execute_query(
+        "CREATE CONSTRAINT constraint_unique_author_id IF NOT EXISTS FOR (n:Author) REQUIRE n.id IS UNIQUE"
+    )
+
+    neo4j_handler.execute_query(
+        "CREATE CONSTRAINT constraint_unique_institution_id IF NOT EXISTS FOR (n:Institution) REQUIRE n.id IS UNIQUE"
+    )
+
     dois = [
-        "https://doi.org/10.1007/s11548-019-01929-x",
-        "https://dx.doi.org/10.3748/wjg.v29.i9.1427",
-        "https://doi.org/10.48550/arXiv.1706.03762"
+        # "https://doi.org/10.1007/s11548-019-01929-x",
+        # "https://dx.doi.org/10.3748/wjg.v29.i9.1427",
+        # "https://doi.org/10.48550/arXiv.1706.03762",
+        "https://doi.org/10.48550/arXiv.1810.04805",
+        "https://doi.org/10.48550/arXiv.2005.14165",
     ]
 
     for doi in dois:
         work = Works()[doi]
-        neo4j_handler.build_graph_from_work(work, 1)
+        # neo4j_handler.build_graph_from_work(work, 1)
+        neo4j_handler.build_graph_from_work(work, 0)
 
     neo4j_handler.close()
