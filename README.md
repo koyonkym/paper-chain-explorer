@@ -32,12 +32,13 @@ paper-chain-explorer/
 │   │   └── ja.json        # Japanese translations
 │   ├── setup_database.py  # Database setup scripts for Neo4j
 │   ├── app.py             # Main Streamlit app entry point
+│   ├── config.py
 │   ├── graph.py           # (Unused) Functions for interacting with Neo4j
 │   └── visualize.py       # (Unused) Logic for graph visualization in Streamlit
 ├── queries/               # (Unused) Predefined Cypher queries for common operations
 ├── notebooks/             # (Unused) Jupyter notebooks for prototyping and experimentation
 ├── tests/                 # Unit tests for backend and frontend functionality
-├── docs/                  # (Unused) Documentation for users and developers
+├── docs/                  # Documentation for users and developers
 ├── .gitignore             # Git ignore rules
 ├── requirements.txt       # Python dependencies
 └── README.md              # Project overview
@@ -48,7 +49,6 @@ paper-chain-explorer/
 > - `src/visualize.py`
 > - `queries/`
 > - `notebooks/`
-> - `docs/`
 
 ## 🧩 Deployment
 To deploy the app to your own server, follow these steps:
@@ -167,12 +167,13 @@ paper-chain-explorer/
 │   │   └── ja.json        # 日本語翻訳
 │   ├── setup_database.py  # Neo4j のデータベースセットアップスクリプト
 │   ├── app.py             # Streamlit アプリのエントリーポイント
+│   ├── config.py
 │   ├── graph.py           # （未使用）Neo4j とのやり取りのための関数
 │   ├── visualize.py       # （未使用）Streamlit でのグラフ可視化のロジック
 ├── queries/               # （未使用）一般的な操作のための事前定義された Cypher クエリ
 ├── notebooks/             # （未使用）プロトタイピングと実験用の Jupyter ノートブック
 ├── tests/                 # バックエンドとフロントエンドの機能テスト
-├── docs/                  # （未使用）ユーザーや開発者向けのドキュメント
+├── docs/                  # ユーザーや開発者向けのドキュメント
 ├── .gitignore             # Git のルール
 ├── requirements.txt       # Python の依存関係
 └── README.md              # プロジェクトの概要
@@ -184,7 +185,6 @@ paper-chain-explorer/
 > - `src/visualize.py`
 > - `queries/`
 > - `notebooks/`
-> - `docs/`
 
 ## 🧩 デプロイ
 アプリをサーバーにデプロイする手順は次のとおりです：

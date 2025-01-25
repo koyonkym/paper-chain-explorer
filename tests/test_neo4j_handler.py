@@ -88,11 +88,20 @@ def test_add_work(mock_neo4j_handler):
         "title": "Test Work"
     }
 
+    # Mock the embed_query method in OpenAIEmbeddings
+    mock_embedder = MagicMock()
+    mock_embedder.embed_query.return_value = [0.1, 0.2, 0.3]
+    mock_neo4j_handler.embedder = mock_embedder
+
     mock_neo4j_handler.add_work(mock_work)
     assert len(mock_neo4j_handler.query_buffer) == 1
     query, params = mock_neo4j_handler.query_buffer[0]
-    assert query == "MERGE (n:Work {id: $id, title: $title})"
-    assert params == {"id": "W0123456789", "title": "Test Work"}
+    assert query == "MERGE (n:Work {id: $id}) ON CREATE SET n.title = $title, n.vectorProperty = $vectorProperty ON MATCH SET n.title = $title, n.vectorProperty = $vectorProperty"
+    assert params == {
+        "id": "W0123456789",
+        "title": "Test Work",
+        "vectorProperty": [0.1, 0.2, 0.3]
+    }
 
 
 def test_add_author(mock_neo4j_handler):

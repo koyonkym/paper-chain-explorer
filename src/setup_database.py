@@ -205,16 +205,15 @@ if __name__ == "__main__":
     )
 
     dois = [
-        # "https://doi.org/10.1007/s11548-019-01929-x",
-        # "https://dx.doi.org/10.3748/wjg.v29.i9.1427",
-        # "https://doi.org/10.48550/arXiv.1706.03762",
+        "https://doi.org/10.1007/s11548-019-01929-x",
+        "https://dx.doi.org/10.3748/wjg.v29.i9.1427",
+        "https://doi.org/10.48550/arXiv.1706.03762",
         "https://doi.org/10.48550/arXiv.1810.04805",
         "https://doi.org/10.48550/arXiv.2005.14165",
     ]
 
     for doi in dois:
         work = Works()[doi]
-        # neo4j_handler.build_graph_from_work(work, 1)
-        neo4j_handler.build_graph_from_work(work, 0)
+        neo4j_handler.build_graph_from_work(work, 1)
 
     neo4j_handler.close()
