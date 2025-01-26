@@ -8,6 +8,8 @@ from neo4j import GraphDatabase
 from neo4j.exceptions import ServiceUnavailable
 from neo4j_graphrag.retrievers import Text2CypherRetriever
 from neo4j_graphrag.llm import OpenAILLM
+from neo4j_graphrag.embeddings import OpenAIEmbeddings
+from src.config import NEO4J_SCHEMA, EXAMPLES
 
 
 # Function to load translations dynamically
@@ -53,27 +55,28 @@ def get_neo4j_driver(uri: str, username: str, password: str) -> neo4j.Driver:
 # @st.cache_resource
 def setup_text2cypher(driver: neo4j.Driver) -> Text2CypherRetriever:
     llm = OpenAILLM(model_name="gpt-4o-mini")
-    neo4j_schema = """
-    Node properties:
-    Work {id: STRING, title: STRING}
-    Author {id: STRING, display_name: STRING}
-    Institution {id: STRING, display_name: STRING}
-    Relationship properties:
-    REFERENCED {}
-    AUTHORED {}
-    AFFILIATED_WITH {}
-    The relationships:
-    (:Work)-[:REFERENCED]->(:Work)
-    (:Author)-[:AUTHORED]->(:Work)
-    (:Author)-[:AFFILIATED_WITH]->(:Institution)
-    """
-    examples = [
-        "USER INPUT: 'Who wrote \"Attention Is All You Need\"?' QUERY: MATCH (a:Author)-[r:AUTHORED]->(w:Work {title: 'Attention Is All You Need'}) RETURN a, r, w",
-        "USER INPUT: 'How is Koyo's \"Liver segmentation\" paper connected to \"Attention Is All You Need\" paper?' QUERY: MATCH p = SHORTEST 1 (a:Author)-[:AUTHORED]->(b:Work)-[*]-(c:Work) WHERE a.display_name CONTAINS 'Koyo' AND b.title CONTAINS 'Liver segmentation' AND c.title = 'Attention Is All You Need' RETURN p",
-        "USER INPUT: '「Attention Is All You Need」を書いたのは誰ですか？' QUERY: MATCH (a:Author)-[r:AUTHORED]->(w:Work {title: 'Attention Is All You Need'}) RETURN a, r, w",
-        "USER INPUT: 'Koyo の「Liver segmentation」の論文は、「Attention Is All You Need」の論文とどのようにつながっていますか？' QUERY: MATCH p = SHORTEST 1 (a:Author)-[:AUTHORED]->(b:Work)-[*]-(c:Work) WHERE a.display_name CONTAINS 'Koyo' AND b.title CONTAINS 'Liver segmentation' AND c.title = 'Attention Is All You Need' RETURN p",
-    ]
-    return Text2CypherRetriever(driver=driver, llm=llm, neo4j_schema=neo4j_schema, examples=examples)
+    custom_prompt = """Task: Generate a Cypher statement for querying a Neo4j graph database from a user input.
+
+Schema:
+{schema}
+
+Vector Search Results:
+{vector_search_results}
+
+Examples:
+{examples}
+
+Input:
+{query_text}
+
+Instructions:
+- Ensure the query returns all nodes and relationships involved in the query.
+- Do not use any properties or relationships not included in the schema.
+- Do not include triple backticks ``` or any additional text except the generated Cypher statement in your response.
+
+Cypher query:
+"""
+    return Text2CypherRetriever(driver=driver, llm=llm, neo4j_schema=NEO4J_SCHEMA, examples=EXAMPLES, custom_prompt=custom_prompt)
 
 uri = os.getenv("NEO4J_URI")
 username = os.getenv("NEO4J_USERNAME")
@@ -90,52 +93,59 @@ driver = get_neo4j_driver(
     password=password
 )
 retriever = setup_text2cypher(driver)
+embedder = OpenAIEmbeddings(model="text-embedding-3-small")
 
-# Function to visualize graph
+# Helper function to add a single node
+def add_node(node: neo4j.graph.Node, label_key: str, nodes: list, id_history: set) -> None:
+    node_id = node["id"]
+    if node_id not in id_history:
+        node_data = {
+            "id": node_id,
+            "title": node[label_key]
+        }
+        # Only set 'label' if the node is not of type 'Work'
+        if "Work" not in node.labels:
+            node_data["label"] = node[label_key]
+        nodes.append(Node(**node_data))
+        id_history.add(node_id)
+
+# Helper function to add a relationship
+def add_relationship(relationship: neo4j.graph.Relationship, nodes: list, edges: list, id_history: set) -> None:
+    add_node(relationship.start_node, "title" if "Work" in relationship.start_node.labels else "display_name", nodes, id_history)
+    add_node(relationship.end_node, "title" if "Work" in relationship.start_node.labels else "display_name", nodes, id_history)
+    edges.append(Edge(
+        source=relationship.start_node["id"],
+        label=relationship.type,
+        target=relationship.end_node["id"]
+    ))
+
 def prepare_graph_data(records):
     nodes = []
     edges = []
-    id_history = []
-
-    def add_node(node, label_key: str) -> None:
-        node_id = node["id"]
-        if node_id not in id_history:
-            node_data = {
-                "id": node_id,
-                "title": node[label_key]
-            }
-            # Only set 'label' if the node is not of type 'Work'
-            if "Work" not in node.labels:
-                node_data["label"] = node[label_key]
-            nodes.append(Node(**node_data))
-            id_history.append(node_id)
+    id_history = set()
 
     for record in records:
         for item in record:
             if isinstance(item, neo4j.graph.Node):
-                add_node(item, "title" if "Work" in item.labels else "display_name")
+                add_node(item, "title" if "Work" in item.labels else "display_name", nodes, id_history)
             elif isinstance(item, neo4j.graph.Path):
                 for node in item.nodes:
-                    add_node(node, "title" if "Work" in node.labels else "display_name")
+                    add_node(node, "title" if "Work" in node.labels else "display_name", nodes, id_history)
                 for relationship in item.relationships:
-                    add_node(relationship.start_node, "title" if "Work" in relationship.start_node.labels else "display_name")
-                    add_node(relationship.end_node, "title" if "Work" in relationship.start_node.labels else "display_name")
-                    edges.append(Edge(
-                        source=relationship.start_node["id"],
-                        label=relationship.type,
-                        target=relationship.end_node["id"]
-                    ))
-            else:
-                add_node(item.start_node, "title" if "Work" in item.start_node.labels else "display_name")
-                add_node(item._end_node, "title" if "Work" in item._end_node.labels else "display_name")
-                edges.append(Edge(
-                    source=item.start_node["id"],
-                    label=item.type,
-                    target=item._end_node["id"]
-                ))
+                    add_relationship(relationship, nodes, edges, id_history)
+            elif isinstance(item, neo4j.graph.Relationship):
+                add_relationship(item, nodes, edges, id_history)
 
     config = Config(height=500)
     return nodes, edges, config
+
+def vector_search(driver, embedder, query_text):
+    vector = embedder.embed_query(query_text)
+    records, summary, keys = driver.execute_query(
+        "CALL db.index.vector.queryNodes('work-vector-index', 3, $vector) YIELD node, score RETURN node.title, score",
+        {"vector": vector}
+    )
+    return records
 
 # Initialize session state for graph data
 if "graph_data" not in st.session_state:
@@ -151,8 +161,10 @@ if button:
     else:
         with st.spinner(translations["processing_message"]):
             try:
+                records = vector_search(driver, embedder, query_text)
+                vector_search_results = "\n".join([f"title: {record[0]}, score: {record[1]}" for record in records])
                 # Generate Cypher query from natural language
-                results = retriever.get_search_results(query_text=query_text)
+                results = retriever.get_search_results(query_text=query_text, prompt_params={"schema": NEO4J_SCHEMA, "vector_search_results": vector_search_results})
 
                 if results.records:
                     st.success(translations["success_message"])
@@ -160,6 +172,7 @@ if button:
                     nodes, edges, config = prepare_graph_data(results.records)
                     st.session_state.graph_data = {"cypher": cypher, "nodes": nodes, "edges": edges, "config": config}
                 else:
+                    st.code(results.metadata["cypher"])
                     st.warning(translations["no_results_message"])
             except Exception as e:
                 st.error(translations["error_message"].format(e))
