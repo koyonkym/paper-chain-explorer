@@ -116,7 +116,7 @@ def test_add_author(mock_neo4j_handler):
     mock_neo4j_handler.add_author(mock_author)
     assert len(mock_neo4j_handler.query_buffer) == 1
     query, params = mock_neo4j_handler.query_buffer[0]
-    assert query == "MERGE (n:Author {id: $id, display_name: $display_name})"
+    assert query == "MERGE (n:Author {id: $id}) ON CREATE SET n.display_name = $display_name ON MATCH SET n.display_name = $display_name"
     assert params == {"id": "A0123456789", "display_name": "Test Author"}
 
 
@@ -132,7 +132,7 @@ def test_add_institution(mock_neo4j_handler):
     mock_neo4j_handler.add_institution(mock_institution)
     assert len(mock_neo4j_handler.query_buffer) == 1
     query, params = mock_neo4j_handler.query_buffer[0]
-    assert query == "MERGE (n:Institution {id: $id, display_name: $display_name})"
+    assert query == "MERGE (n:Institution {id: $id}) ON CREATE SET n.display_name = $display_name ON MATCH SET n.display_name = $display_name"
     assert params == {"id": "I0123456789", "display_name": "Test Institution"}
 
 
