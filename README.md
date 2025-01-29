@@ -119,6 +119,7 @@ Here are the key resources used for data and development:
 - [GraphRAG for Python — neo4j-graphrag-python  documentation](https://neo4j.com/docs/neo4j-graphrag-python/current/index.html)
 - [Streamlit documentation](https://docs.streamlit.io/)
 - [ChrisDelClea/streamlit-agraph: A Streamlit Graph Vis](https://github.com/ChrisDelClea/streamlit-agraph)
+- [Vector Icons and Stickers - PNG, SVG, EPS, PSD and CSS](https://www.flaticon.com/)
 
 ## 🌟 Contribution
 We welcome contributions to improve PaperChainExplorer! Here are ways you can help:
@@ -128,6 +129,12 @@ We welcome contributions to improve PaperChainExplorer! Here are ways you can he
 
 ## 📜 License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## 📑 Attribution
+This project uses icons provided by Flaticon. Below are the specific attributions:
+- [Academic icons created by Slamlabs - Flaticon](https://www.flaticon.com/free-icons/academic)
+- [Graduation hat icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/graduation-hat)
+- [Institute icons created by vectorspoint - Flaticon](https://www.flaticon.com/free-icons/institute)
 
 <br>
 <br>
@@ -255,6 +262,7 @@ pytest tests/
 - [GraphRAG for Python — neo4j-graphrag-python  documentation](https://neo4j.com/docs/neo4j-graphrag-python/current/index.html)
 - [Streamlit documentation](https://docs.streamlit.io/)
 - [ChrisDelClea/streamlit-agraph: A Streamlit Graph Vis](https://github.com/ChrisDelClea/streamlit-agraph)
+- [Vector Icons and Stickers - PNG, SVG, EPS, PSD and CSS](https://www.flaticon.com/)
 
 ## 🌟 貢献
 PaperChainExplorer の改善への貢献を歓迎します！以下の方法でご協力いただけます：
@@ -264,3 +272,9 @@ PaperChainExplorer の改善への貢献を歓迎します！以下の方法で�
 
 ## 📜 ライセンス
 このプロジェクトは MIT ライセンスのです。詳細は [LICENSE](LICENSE) ファイルをご覧ください。
+
+## 📑 帰属表示
+このプロジェクトでは、Flaticon が提供するアイコンを使用しています。以下に具体的な帰属情報を記載します。
+- [Slamlabs によって作成された学術アイコン - Flaticon](https://www.flaticon.com/free-icons/academic)
+- [Freepik によって作成された卒業帽アイコン - Flaticon](https://www.flaticon.com/free-icons/graduation-hat)
+- [vectorspoint によって作成された施設アイコン - Flaticon](https://www.flaticon.com/free-icons/institute)

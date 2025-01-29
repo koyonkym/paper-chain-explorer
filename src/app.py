@@ -99,9 +99,19 @@ embedder = OpenAIEmbeddings(model="text-embedding-3-small")
 def add_node(node: neo4j.graph.Node, label_key: str, nodes: list, id_history: set) -> None:
     node_id = node["id"]
     if node_id not in id_history:
+        if "Work" in node.labels:
+            image_url = "https://raw.githubusercontent.com/koyonkym/paper-chain-explorer/refs/heads/main/src/assets/icons/research-paper.png"
+        elif "Author" in node.labels:
+            image_url = "https://raw.githubusercontent.com/koyonkym/paper-chain-explorer/refs/heads/main/src/assets/icons/graduation-hat.png"
+        elif "Institution" in node.labels:
+            image_url = "https://raw.githubusercontent.com/koyonkym/paper-chain-explorer/refs/heads/main/src/assets/icons/institute.png"
+        else:
+            image_url = None
         node_data = {
             "id": node_id,
-            "title": node[label_key]
+            "title": node[label_key],
+            "shape": "circularImage",
+            "image": image_url
         }
         # Only set 'label' if the node is not of type 'Work'
         if "Work" not in node.labels:
@@ -185,3 +195,13 @@ if st.session_state.graph_data:
         edges=st.session_state.graph_data["edges"],
         config=st.session_state.graph_data["config"]
     )
+
+st.markdown(
+"""
+---
+### Attribution
+- [Academic icons created by Slamlabs - Flaticon](https://www.flaticon.com/free-icons/academic)
+- [Graduation hat icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/graduation-hat)
+- [Institute icons created by vectorspoint - Flaticon](https://www.flaticon.com/free-icons/institute)
+"""
+)
