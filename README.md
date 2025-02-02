@@ -16,6 +16,9 @@ Inspired by the idea of uncovering hidden connections in academic research, this
 - Simple and intuitive user interface built with **Streamlit**.
 - Wondering if your *mediocre* paper connects to a groundbreaking one like *"Attention Is All You Need"*? PaperChainExplorer helps uncover these surprising relationships.
 
+### 📸 Demo Screenshot
+![PaperChainExplorer Demo](docs/demo.png)
+
 ## 🛠️ Tech Stack
 - **Backend**: Python - Handles application logic, integrates with Neo4j, and fetches data from external sources.
 - **Database**: Neo4j - Graph database used to store and query relationships between academic papers, authors.
@@ -157,6 +160,9 @@ PaperChainExplorer は、研究者や学生、学術専門家が、学術論文�
 - 引用ネットワークや共有著者関係をインタラクティブに探索。
 - **Streamlit** を使用して構築されたシンプルで直感的なユーザーインターフェース。
 - 私の*平凡な*論文が、「Attention Is All You Need」のような画期的な論文と繋がっているかどうか知りたいですか？PaperChainExplorerがこれらの驚くべき関係を明らかにします。
+
+### 📸 デモスクリーンショット
+![PaperChainExplorer デモ](docs/demo.png)
 
 ## 🛠️ 技術スタック
 - **バックエンド**: Python - アプリケーションロジックの処理、Neo4jとの統合、外部ソースからのデータ取得を実行。
