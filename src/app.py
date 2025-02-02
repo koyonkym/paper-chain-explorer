@@ -9,7 +9,7 @@ from neo4j.exceptions import ServiceUnavailable
 from neo4j_graphrag.retrievers import Text2CypherRetriever
 from neo4j_graphrag.llm import OpenAILLM
 from neo4j_graphrag.embeddings import OpenAIEmbeddings
-from src.config import NEO4J_SCHEMA, EXAMPLES
+from config import NEO4J_SCHEMA, EXAMPLES
 
 
 # Function to load translations dynamically
